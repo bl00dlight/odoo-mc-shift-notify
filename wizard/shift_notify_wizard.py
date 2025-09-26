@@ -78,13 +78,18 @@ class MCShiftNotifyWizard(models.TransientModel):
         if not partners:
             raise UserError(_("Немає жодного партнера з прив'язаним користувачем для вибраних працівників."))
 
-        # Надсилання через Inbox (message_notify) — стабільно на всіх збірках із `mail`
-        for p in partners:
-            p.message_notify(
+        # Надсилання через прямий чат Discuss; будуємо/знаходимо канал і постимо у нього
+        channel_model = self.env["mail.channel"].sudo()
+        for partner in partners:
+            channel_info = channel_model.channel_get([partner.id])
+            channel = channel_model.browse(channel_info.get("id"))
+            if not channel:
+                continue
+            channel.with_context(mail_create_nosubscribe=True).message_post(
                 body=body,
+                message_type="comment",
                 subtype_xmlid="mail.mt_comment",
-                partner_ids=[p.id],
-                email_layout_xmlid="mail.mail_notification_light",
+                author_id=self.env.user.partner_id.id,
             )
 
         # Опційно: e-mail
@@ -96,7 +101,7 @@ class MCShiftNotifyWizard(models.TransientModel):
                     "body_html": f"<p>{body}</p>",
                 }).send()
 
-        success_msg = _("Повідомлення надіслано {count} отримувачам через Inbox.").format(
+        success_msg = _("Повідомлення надіслано {count} отримувачам у Discuss (прямий чат).").format(
             count=len(partners)
         )
         if self.send_email:
