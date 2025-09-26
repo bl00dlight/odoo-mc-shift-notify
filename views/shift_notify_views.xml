@@ -1,0 +1,46 @@
+<odoo>
+  <record id="action_mc_shift_notify_wizard" model="ir.actions.act_window">
+    <field name="name">Повідомлення на завтра</field>
+    <field name="res_model">mc.shift.notify.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <menuitem id="menu_mc_shift_root"
+            name="MC Tools"
+            parent="base.menu_administration"
+            sequence="90"/>
+  <menuitem id="menu_mc_shift_notify"
+            name="Повідомлення на завтра"
+            parent="menu_mc_shift_root"
+            action="action_mc_shift_notify_wizard"
+            sequence="10"/>
+
+  <record id="view_mc_shift_notify_wizard" model="ir.ui.view">
+    <field name="name">mc.shift.notify.wizard.form</field>
+    <field name="model">mc.shift.notify.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Повідомлення на завтра">
+        <group>
+          <group>
+            <field name="department_id" options="{'no_open': False}"/>
+            <field name="employee_ids" widget="many2many_tags"
+                   domain="[('user_id','!=',False), '|', ('department_id','=',department_id), ('department_id','=',False)]"/>
+          </group>
+          <group>
+            <field name="start_time"/>
+            <field name="end_time"/>
+            <field name="send_email"/>
+          </group>
+        </group>
+        <group>
+          <field name="message" placeholder="Текст повідомлення з плейсхолдерами {start} і {end}"/>
+        </group>
+        <footer>
+          <button string="Надіслати" type="object" name="action_notify" class="btn-primary"/>
+          <button string="Скасувати" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>
