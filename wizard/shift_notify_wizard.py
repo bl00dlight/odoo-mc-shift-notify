@@ -96,4 +96,11 @@ class MCShiftNotifyWizard(models.TransientModel):
                     "body_html": f"<p>{body}</p>",
                 }).send()
 
+        success_msg = _("Повідомлення надіслано {count} отримувачам через Inbox.").format(
+            count=len(partners)
+        )
+        if self.send_email:
+            success_msg += _(" Додатково надіслано e-mail тим, у кого вказана адреса.")
+        self.env.user.notify_success(success_msg)
+
         return {"type": "ir.actions.act_window_close"}
